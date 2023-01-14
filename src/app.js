@@ -36,6 +36,7 @@ app.post('/participants', async (req, res) => {
         })
         return res.status(422).send(errors)
     }
+    
     try {
         const userCreated = await db.collection('participants').findOne({name: user.name});
         if (userCreated) return res.status(409).send('Usuário já cadastrado!');
@@ -69,11 +70,17 @@ app.post('/messages', async (req, res) => {
     const dataSchema = joi.object({
         to: joi.string().empty().required(),
         text: joi.string().empty().required(),
-        type: joi.message().private_message().required()
+        type: joi.required()
     });
 
     const validation = dataSchema.validate(data, {abortEarly: false});
-    console.log(validation);
+    if(validation.error) {
+        const errors = validation.error.details.map((err) => {
+            return err.message
+        })
+        return res.status(422).send(errors)
+    }
+
     try {
         const model = await db.collection('messages').insertOne({to: data.to, text: data.text, type: data.type, time: dayjs(Date.now()).format('HH:mm:ss')});
         return res.status(201).send(model);
