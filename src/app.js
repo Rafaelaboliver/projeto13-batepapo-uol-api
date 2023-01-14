@@ -43,6 +43,7 @@ app.post('/participants', async (req, res) => {
 app.get('/participants', async (req, res) => {
      
      try {
+        
         const info = await db.collection('participants').find().toArray();
         return res.send(info);
 
@@ -71,17 +72,19 @@ app.post('/messages', async (req, res) => {
 app.get('/messages', async (req, res) => {
      
     try {
-       const message = await db.collection('messages').find().toArray();
-       return res.send(message);
+        const {limit} = req.query;
+        const message = await db.collection('messages').find().toArray();
+        const display = (message.length - limit)
+        return res.send(message.slice(display));
 
     } catch (error) {
-       res.status(500).send('Erro no servidor!')
+        res.status(500).send('Erro no servidor!')
     }
 });
 
 //requisito: POST('status')
 app.post('/status', async (req, res) => {
-    
+
 })
 
 //LEMBRETE: alterar a porta do servidor para 5000 antes de enviar o projeto
