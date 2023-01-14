@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { MongoClient } from 'mongodb';
+import dayjs from 'dayjs';
 
 dotenv.config()
 
@@ -51,8 +52,34 @@ app.get('/participants', async (req, res) => {
 });
 
 //requisito: POST('messages')
+app.post('/messages', async (req, res) => {
+    const { to, text, type, time} = req.body
+
+    try {
+        const model = await db.collection('messages').insertOne({to, text, type, time: dayjs(Date.now()).format('HH:mm:ss')});
+        return res.status(201).send(model);
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('Erro no servidor!');
+    };
+    
+
+});
 
 //requisito: GET('messages')
+app.get('/messages', async (req, res) => {
+     
+    try {
+       const message = await db.collection('messages').find().toArray();
+       return res.send(message);
+
+    } catch (error) {
+       res.status(500).send('Erro no servidor!')
+    }
+});
+
+//requisito: POST('status')
 
 //LEMBRETE: alterar a porta do servidor para 5000 antes de enviar o projeto
 const PORT = 5003;
