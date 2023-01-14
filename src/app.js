@@ -80,6 +80,9 @@ app.get('/messages', async (req, res) => {
 });
 
 //requisito: POST('status')
+app.post('/status', async (req, res) => {
+    
+})
 
 //LEMBRETE: alterar a porta do servidor para 5000 antes de enviar o projeto
 const PORT = 5003;
