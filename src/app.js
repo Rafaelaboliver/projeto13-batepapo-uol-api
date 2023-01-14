@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import joi from 'joi';
 import { MongoClient } from 'mongodb';
 import dayjs from 'dayjs';
 
@@ -23,13 +24,23 @@ app.use(cors());
 
 //requisito: POST('participants')
 app.post('/participants', async (req, res) => {
-    const { name, lastStatus} = req.body
+    const user = req.body
+    const userSchema = joi.object({
+        name: joi.string().empty().required()
+    });
 
+    const validation = userSchema.validate(user, {abortEarly: false});
+    if(validation.error) {
+        const errors = validation.error.details.map((err) => {
+            return err.message
+        })
+        return res.status(422).send(errors)
+    }
     try {
-        const userCreated = await db.collection('participants').findOne({name});
+        const userCreated = await db.collection('participants').findOne({name: user.name});
         if (userCreated) return res.status(409).send('Usuário já cadastrado!');
 
-        await db.collection('participants').insertOne({name, lastStatus: Date.now()});
+        await db.collection('participants').insertOne({name: user.name, lastStatus: Date.now()});
         res.status(201).send('Cadastro realizado com sucesso!');
 
     } catch (error) {
@@ -54,10 +65,17 @@ app.get('/participants', async (req, res) => {
 
 //requisito: POST('messages')
 app.post('/messages', async (req, res) => {
-    const { to, text, type, time} = req.body
+    const data = req.body
+    const dataSchema = joi.object({
+        to: joi.string().empty().required(),
+        text: joi.string().empty().required(),
+        type: joi.message().private_message().required()
+    });
 
+    const validation = dataSchema.validate(data, {abortEarly: false});
+    console.log(validation);
     try {
-        const model = await db.collection('messages').insertOne({to, text, type, time: dayjs(Date.now()).format('HH:mm:ss')});
+        const model = await db.collection('messages').insertOne({to: data.to, text: data.text, type: data.type, time: dayjs(Date.now()).format('HH:mm:ss')});
         return res.status(201).send(model);
 
     } catch (error) {
