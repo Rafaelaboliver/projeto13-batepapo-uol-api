@@ -152,5 +152,5 @@ function handlleDeleteUser() {
 handlleDeleteUser();
 
 //LEMBRETE: alterar a porta do servidor para 5000 antes de enviar o projeto
-const PORT = 5000;
-app.listen (PORT, () => console.log(`servidor rodando na paz do Senhor na porta ${PORT}`))
+const PORT = 5003;
+app.listen(PORT, () => console.log(`servidor rodando na paz do Senhor na porta ${PORT}`))
