@@ -73,10 +73,10 @@ app.post('/messages', async (req, res) => {
     const data = req.body
     let from = req.headers.user;
 
-    if(!from) {
+    if(!from || !data.to || !data.text || !data.type) {
         return res.status(422).send('Falta um requisito')
     };
-    
+
     from = utf8.decode(from);
 
     const dataSchema = joi.object({
