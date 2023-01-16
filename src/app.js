@@ -40,11 +40,11 @@ app.post('/participants', async (req, res) => {
     }
 
     try {
-        const userCreated = await db.collection('participants').findOne({ name: user.name.toLowerCase() });
+        const userCreated = await db.collection('participants').findOne({ name: user.name });
         if (userCreated) return res.status(409).send('Usuário já cadastrado!');
 
-        await db.collection('participants').insertOne({ name: user.name.toLowerCase(), lastStatus: Date.now() });
-        await db.collection('messages').insertOne({ from: user.name.toLowerCase(), to: 'Todos', text: 'entra na sala...', type: 'status', time: dayjs(Date.now()).format('HH:mm:ss') });
+        await db.collection('participants').insertOne({ name: user.name, lastStatus: Date.now() });
+        await db.collection('messages').insertOne({ from: user.name, to: 'Todos', text: 'entra na sala...', type: 'status', time: dayjs(Date.now()).format('HH:mm:ss') });
         res.status(201).send('Ingresso realizado com sucesso!');
 
     } catch (error) {
