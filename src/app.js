@@ -26,7 +26,7 @@ app.use(cors());
 //requisito: POST('participants')
 app.post('/participants', async (req, res) => {
     const user = req.body
-    
+
     const userSchema = joi.object({
         name: joi.string().empty().required()
     });
@@ -73,11 +73,15 @@ app.post('/messages', async (req, res) => {
     const data = req.body
     let from = req.headers.user;
 
-    if(!from || !data.to || !data.text || !data.type) {
+    if (!from || !data.to || !data.text || !data.type) {
         return res.status(422).send('Falta um requisito')
     };
 
     from = utf8.decode(from);
+    const hasUser = await db.collection('participants').findOne({ name: from });
+    if (!hasUser) {
+        return res.status(422).send('Usuário não cadastrado!')
+    };
 
     const dataSchema = joi.object({
         to: joi.string().empty().required(),
@@ -113,8 +117,18 @@ app.post('/messages', async (req, res) => {
 //requisito: GET('messages')
 app.get('/messages', async (req, res) => {
     const user = req.headers.user;
+    let limit = 100;
+
+    if (req.query.limit) {
+        limit = parseInt(req.query.limit);
+    }
+
+    if (limit < 1 || isNaN(limit)) {
+        return res.status(422).send("Limite inválido!");
+    }
+
     try {
-        const { limit } = req.query;
+
         const message = await db.collection('messages').find({
             $or: [
                 { to: user },
@@ -123,7 +137,7 @@ app.get('/messages', async (req, res) => {
                 { type: "message" },
             ],
         }).toArray();
-        const display = (message.length - limit)
+        const display = (message.length - limit);
         return res.send(message.slice(display).reverse());
 
     } catch (error) {
