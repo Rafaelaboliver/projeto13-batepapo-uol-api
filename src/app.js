@@ -2,8 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import joi from 'joi';
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient } from 'mongodb';
 import dayjs from 'dayjs';
+import utf8 from "utf8";
 
 dotenv.config()
 
@@ -70,7 +71,13 @@ app.get('/participants', async (req, res) => {
 //requisito: POST('messages')
 app.post('/messages', async (req, res) => {
     const data = req.body
-    const from = req.headers.user;
+    let from = req.headers.user;
+
+    if(!from) {
+        return res.status(422).send('Falta um requisito')
+    };
+    
+    from = utf8.decode(from);
 
     const dataSchema = joi.object({
         to: joi.string().empty().required(),
